@@ -9,6 +9,13 @@
 #select_line = re.compile('SELECT(.+?)FROM?',flags=re.DOTALL).findall(qry)
 #column_list = re.compile('\w+\.(?:\'(?:\w|\s|#)+\'n|\w+)',flags = re.DOTALL).findall(select_line[0])
 
+def write_program_list(file_list):
+    with open('list_of_programs.txt','w') as fout:
+        for (srcdir, egp) in file_list:
+            mod_time = os.path.getmtime(srcdir+'/'+egp)
+            mod_date = time.strftime('%Y-%m-%d', time.localtime(mod_time))
+            fout.write('%s\t%s\t%s\n' % (srcdir, egp, mod_date))
+
 if __name__ == '__main__':
     import xmltodict
     import sys
@@ -19,15 +26,14 @@ if __name__ == '__main__':
     import egpmove
     import egpcols
     import operator
-
+    
     startdir = '/home/will/pyscripts'
     outdir = '/home/will/pyscripts/temp'
-    file_list =  egpmove.find_egps(os.getcwd())
+    file_list =  egpmove.find_egps(startdir)
+    write_program_list(file_list)
     temp_zip_list = []
-    with open('list_of_programs.txt','w') as fout:
-        for (srcdir, egp) in file_list:
-            egpmove.move_zip_egp(egp, srcdir, outdir)
-            fout.write('%s\t%s\n' % (srcdir, egp))
+    for (srcdir, egp) in file_list:
+        egpmove.move_zip_egp(egp, srcdir, outdir)
     #Crawl the outdir to map new names of programs
     new_zip_list = os.listdir(outdir)
     #For every EGP, unzip it and extract project.xml file
