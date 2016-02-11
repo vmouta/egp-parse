@@ -1,13 +1,4 @@
 #!/usr/bin/env python
-#f = open('query_test','r')
-#qry = f.readlines()
-#f.close()
-#qry="".join(qry)
-
-#from_line = re.compile('FROM(.+?)(?:WHERE|;)+?',flags=re.DOTALL).findall(qry)
-#table_list = re.compile('\w+\.\w+\s\w+',flags=re.DOTALL).findall(''.join(from_line))
-#select_line = re.compile('SELECT(.+?)FROM?',flags=re.DOTALL).findall(qry)
-#column_list = re.compile('\w+\.(?:\'(?:\w|\s|#)+\'n|\w+)',flags = re.DOTALL).findall(select_line[0])
 
 def write_program_list(file_list):
     with open('list_of_programs.txt','w') as fout:
@@ -15,6 +6,10 @@ def write_program_list(file_list):
             mod_time = os.path.getmtime(srcdir+'/'+egp)
             mod_date = time.strftime('%Y-%m-%d', time.localtime(mod_time))
             fout.write('%s\t%s\t%s\n' % (srcdir, egp, mod_date))
+
+def filter_dir_for(directory, ext):
+    dir_contents = os.listdir(directory)
+    return [afile for afile in dir_contents if afile[-len(ext):]==ext]
 
 if __name__ == '__main__':
     import xmltodict
@@ -27,29 +22,31 @@ if __name__ == '__main__':
     import egpcols
     import operator
     
-    startdir = '/home/will/pyscripts'
-    outdir = '/home/will/pyscripts/temp'
+    startdir = sys.argv[1]
+    outdir = sys.argv[2]
+
     file_list =  egpmove.find_egps(startdir)
+
     write_program_list(file_list)
-    temp_zip_list = []
+
     for (srcdir, egp) in file_list:
         egpmove.move_zip_egp(egp, srcdir, outdir)
+
     #Crawl the outdir to map new names of programs
-    new_zip_list = os.listdir(outdir)
+    egps_as_zips = filter_dir_for(outdir, '.zip')
+
     #For every EGP, unzip it and extract project.xml file
-    for file in new_zip_list:
-        if file[-4:]==".zip":
-            egpmove.unpack_egp(outdir,file,outdir)
-        else:
-            pass
+    for egpzip in egps_as_zips:
+        egpmove.unpack_egp(outdir,egpzip,outdir)
+
     #Identify list of XML documents
-    xml_list_full = os.listdir(outdir)
-    xml_list = [file for file in xml_list_full if file[-4:]==".xml"]
+    xml_list = filter_dir_for(outdir, '.xml')
+
+    #Loop through 
     for program in xml_list:
         with open(outdir+'/'+program,'r') as egp:
             xmldict = xmltodict.parse(egp.read())
-            print program
-            print "====================="
+            print '====='+program+'====='
             for query in egpcols.reach_task_code(xmldict):
                 col_list = egpcols.list_columns(query)
                 with open('column_list.txt','a') as coltxt:
