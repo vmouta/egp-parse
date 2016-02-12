@@ -66,7 +66,7 @@ def list_columns(query):
     if table_list is None or column_list is None:
         return None
     else:
-        table_dict = {j[1]:j[0] for j in [i.split(' ') for i in table_list]}
+        table_dict = {j[1]:j[0] for j in [i.split(' ') for i in table_list if len(i.split(' ')==2]}
         for col_idx in range(0,len(column_list)):
             col = column_list[col_idx]
             #For every column, loop through available tables
