@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import sys
 import os
-import egpparse.find as find
-import egpparse.output as output
-import egpparse.move as move
-import egpparse.transform as transform
-import egpparse.parse as parse
+import find
+import output
+import move
+import transform
+import parse
 
 def filter_dir_for(directory, ext):
     dir_contents = os.listdir(directory)
