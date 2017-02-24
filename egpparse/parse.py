@@ -55,16 +55,19 @@ def column_parse2(query, pattern = r"\w+\.(?:\'(?:\w|\s|#)+\'n|\w+)"):
 def table_parse(query):
     """Extracts Tables between a FROM and (WHERE|;)
        and returns a list or None"""
-    from_line = re.compile('FROM(.+?)(?:WHERE|;)+?',flags=re.DOTALL).findall(query)[0]
-    table_list = re.compile('\w+\.\w+\s\w+',flags=re.DOTALL).findall(from_line)
+    try:
+        from_line = re.compile('FROM(.+?)(?:WHERE|;)+?',flags=re.DOTALL).findall(query)[0]
+        table_list = re.compile('\w+\.\w+\s\w+',flags=re.DOTALL).findall(from_line)
+    except IndexError:
+        return None
     return table_list
 
 
 def list_columns(query):
     """Regular Expressions for Pulling out tables and columns
        from TASK CODE block (Specifically a PROC SQL query)"""
-    table_list = table_parse(query[0])
-    column_list = column_parse2(query[0])
+    table_list = table_parse(query)
+    column_list = column_parse2(query)
 
     if table_list is None or column_list is None:
         return None

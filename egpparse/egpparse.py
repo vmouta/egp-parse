@@ -34,10 +34,13 @@ if __name__ == '__main__':
         # Parse the Task Code
         q = parse.get_tasks(outdir + '/' + xml_file_name)
 
-        col_list = parse.list_columns(q)
-
         # Write out the
         with open(outdir + '/column_list.txt', 'a') as coltxt:
-            for col in col_list:
-                coltxt.write('%s\t%s\t%s\n' % (str(idx), egp, col))
+            for task in q:
+                try:
+                    col_list = parse.list_columns(task)
+                    for col in col_list:
+                        coltxt.write('%s\t%s\t%s\n' % (str(idx), egp, col))
+                except TypeError:
+                    coltxt.write('%s\t%s\t%s\n' % (str(idx), egp, "Unable to parse"))
 
