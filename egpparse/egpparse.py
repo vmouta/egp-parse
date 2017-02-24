@@ -17,24 +17,27 @@ if __name__ == '__main__':
     outdir = sys.argv[2]
 
     # Find all EGPs in throughout startdir
+    # Enumerate to create idx (idx, (filepath, filename))
     file_list =  find.find_egps(startdir)
 
     # Write out all discovered EGPs to a text file
-    output.write_program_list(file_list, outdir + '/' + 'egps.txt')
+    output.write_program_list(enumerate(file_list), outdir + '/' + 'egps.txt')
 
-    for dir_egp_tuple in file_list:
+    for (idx, (dir, egp)) in enumerate(file_list):
+
         # Move all EGPs to outdir
-        move.move_egp(dir_egp_tuple, outdir)
+        move.move_egp(idx, dir, egp, outdir)
 
         # Extract XML file from inside EGP
-        xml_file_name = transform.egptocode(outdir + '/' + dir_egp_tuple[1])
+        xml_file_name = transform.egptocode(outdir + '/' + str(idx) + egp)
 
         # Parse the Task Code
         q = parse.get_tasks(outdir + '/' + xml_file_name)
 
         col_list = parse.list_columns(q)
 
+        # Write out the
         with open(outdir + '/column_list.txt', 'a') as coltxt:
             for col in col_list:
-                coltxt.write('%s\t%s\n' % (dir_egp_tuple[1], col))
+                coltxt.write('%s\t%s\t%s\n' % (str(idx), egp, col))
 
